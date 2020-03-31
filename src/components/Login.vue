@@ -55,7 +55,6 @@ export default {
         if (valid) {
           alert('login!')
         } else {
-          console.log('error login!!')
           return false
         }
       })
