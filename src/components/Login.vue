@@ -17,7 +17,7 @@
           </el-form-item>
           <!-- 按钮 -->
           <el-form-item class="button_container">
-            <el-button type="primary" @click="loginClick">登录</el-button>
+            <el-button type="primary" :loading="loading" @click="loginClick">登录</el-button>
             <el-button type="info" @click="resetClick">重置</el-button>
           </el-form-item>
         </el-form>
@@ -27,6 +27,9 @@
 </template>
 
 <script>
+
+import loginRequest from '../network/login'
+
 export default {
   name: 'Login',
   data () {
@@ -44,16 +47,28 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 6, max: 18, message: '长度在 6 到 18 个字符', trigger: 'blur' }
         ]
-      }
+      },
+      loading: false
     }
   },
 
   methods: {
     loginClick () {
-      console.log(`login 账号:${this.form.account} 密码:${this.form.password}`)
       this.$refs.formRef.validate((valid) => {
         if (valid) {
-          alert('login!')
+          this.loading = true
+          loginRequest.login(this.form.account, this.form.password).then((res) => {
+            this.loading = false
+            if (res.meta.status === 200) {
+              this.$message.success('恭喜你,登录成功')
+              // 保存在sessionStorage中
+              window.sessionStorage.setItem('token', res.data.token)
+              // 跳转到首页
+              this.$router.replace('/home')
+            } else {
+              this.$message.error(res.meta.msg)
+            }
+          })
         } else {
           return false
         }
@@ -61,7 +76,6 @@ export default {
     },
 
     resetClick () {
-      console.log('reset', this)
       this.$refs.formRef.resetFields()
     }
   }
