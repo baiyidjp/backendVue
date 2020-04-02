@@ -64,7 +64,7 @@ export default {
               // 保存在sessionStorage中
               window.sessionStorage.setItem('token', res.data.token)
               // 跳转到首页
-              this.$router.replace('/home')
+              this.$router.replace('/main')
             } else {
               this.$message.error(res.meta.msg)
             }

@@ -5,7 +5,7 @@ Vue.use(VueRouter)
 
 // 懒加载路由
 const Login = () => import('../components/Login.vue')
-const Home = () => import('../components/Home.vue')
+const Main = () => import('../components/Main.vue')
 
 const routes = [
   {
@@ -17,8 +17,8 @@ const routes = [
     component: Login
   },
   {
-    path: '/home',
-    component: Home
+    path: '/main',
+    component: Main
   }
 ]
 
