@@ -14,7 +14,30 @@
       <!--主要-->
       <el-container>
         <!--边栏-->
-        <el-aside width="200px">Aside</el-aside>
+        <el-aside width="200px">
+          <el-menu
+            default-active="1"
+            background-color="#5a2b81"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+            <el-submenu index="1">
+              <template slot="title">
+                <i class="el-icon-menu"></i>
+                <span>导航一</span>
+              </template>
+              <el-menu-item index="1-1">选项1-1</el-menu-item>
+              <el-menu-item index="1-2">选项1-2</el-menu-item>
+            </el-submenu>
+            <el-submenu index="2">
+              <template slot="title">
+                <i class="el-icon-setting"></i>
+                <span>导航二</span>
+              </template>
+              <el-menu-item index="2-1">选项2-1</el-menu-item>
+              <el-menu-item index="2-2">选项2-2</el-menu-item>
+            </el-submenu>
+          </el-menu>
+        </el-aside>
         <!--显示区域-->
         <el-main>Main</el-main>
       </el-container>
@@ -40,14 +63,14 @@ export default {
     .main_container {
       height: 100%;
       .el-header {
-        background-color: #5a2b81;
+        background-color: #ffffff;
         display: flex;
         justify-content: space-between;
         align-items: center;
         .logo_container {
           display: flex;
           align-items: center;
-          color: #ffffff;
+          color: #000000;
           font-size: 20px;
           img {
             margin-right: 10px;
@@ -59,7 +82,13 @@ export default {
         }
       }
       .el-aside {
-        background-color: #0086b3;
+        background-color: #5a2b81;
+        el-submenu_title:hover {
+          background-color: #DED4E6;
+        }
+        el-menu-item:hover {
+          /*background-color: #DED4E6;*/
+        }
       }
       .el-main {
         background-color: #fafafa;
