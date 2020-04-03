@@ -3,8 +3,13 @@
     <el-container class="main_container">
       <!--头部-->
       <el-header>
-        Header
-        <el-button type="primary" @click="clickLogout">退出</el-button>
+        <div class="logo_container">
+          <img src="../assets/img/1024.png" alt="" width="44px">
+          <div>后台管理系统</div>
+        </div>
+        <div>
+          <el-button type="primary" @click="clickLogout">退出</el-button>
+        </div>
       </el-header>
       <!--主要-->
       <el-container>
@@ -39,6 +44,15 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        .logo_container {
+          display: flex;
+          align-items: center;
+          color: #ffffff;
+          font-size: 20px;
+          img {
+            margin-right: 10px;
+          }
+        }
         .el-button {
           width: 80px;
           height: 40px;
