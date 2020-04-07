@@ -9,6 +9,8 @@ export function request (config) {
   // 拦截器
   /* 请求拦截 */
   instance.interceptors.request.use(config => {
+    const token = window.sessionStorage.getItem('token')
+    config.headers.Authorization = token
     return config
   }, error => {
     console.log(error)
