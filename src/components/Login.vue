@@ -28,7 +28,7 @@
 
 <script>
 
-import loginRequest from '../network/login'
+import loginRequest from '../network/login_page'
 
 export default {
   name: 'Login',

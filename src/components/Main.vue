@@ -14,27 +14,28 @@
       <!--主要-->
       <el-container>
         <!--边栏-->
-        <el-aside width="200px">
+        <el-aside :width="isCollapse ? '64px' : '200px'">
+          <el-button class="collapse_button" type="primary" plan @click="collapseButtonClick">{{isCollapse ? "展开" : "收起"}}</el-button>
           <el-menu
             default-active="1"
             background-color="#5a2b81"
             text-color="#fff"
-            active-text-color="#ffd04b">
-            <el-submenu index="1">
+            active-text-color="#ffd04b"
+            unique-opened
+            :collapse = "isCollapse"
+            :collapse-transition = "false">
+            <!-- 一级菜单 -->
+            <el-submenu v-for="item in menusData" :key="item.id" :index="item.id + ''">
               <template slot="title">
-                <i class="el-icon-menu"></i>
-                <span>导航一</span>
+                <img :src="item.image" class="item_menu_image">
+                <span>{{item.authName}}</span>
               </template>
-              <el-menu-item index="1-1">选项1-1</el-menu-item>
-              <el-menu-item index="1-2">选项1-2</el-menu-item>
-            </el-submenu>
-            <el-submenu index="2">
-              <template slot="title">
-                <i class="el-icon-setting"></i>
-                <span>导航二</span>
-              </template>
-              <el-menu-item index="2-1">选项2-1</el-menu-item>
-              <el-menu-item index="2-2">选项2-2</el-menu-item>
+              <el-menu-item v-for="child in item.children" :key="child.id" :index="child.id + ''">
+                <template slot="title">
+                  <i class="el-icon-menu"></i>
+                  <span>{{child.authName}}</span>
+                </template>
+              </el-menu-item>
             </el-submenu>
           </el-menu>
         </el-aside>
@@ -46,12 +47,39 @@
 </template>
 
 <script>
+
+import mainRequest from '../network/main_page'
+
 export default {
   name: 'Main',
+  data () {
+    return {
+      menusData: [],
+      isCollapse: false
+    }
+  },
+  created () {
+    this.requestMenuData()
+  },
   methods: {
     clickLogout () {
-      window.sessionStorage.removeItem('token')
+      window.sessionStorage.clear()
       this.$router.replace('/login')
+    },
+    requestMenuData () {
+      mainRequest.menuData().then((res) => {
+        console.log(res)
+        if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+        const menusData = res.data
+        for (let i = 0; i < menusData.length; i++) {
+          const menuData = menusData[i]
+          menuData.image = require(`../assets/img/menu/menu_${i}.png`)
+        }
+        this.menusData = menusData
+      })
+    },
+    collapseButtonClick () {
+      this.isCollapse = !this.isCollapse
     }
   }
 }
@@ -83,11 +111,22 @@ export default {
       }
       .el-aside {
         background-color: #5a2b81;
-        el-submenu_title:hover {
-          background-color: #DED4E6;
+        display: flex;
+        flex-direction: column;
+        .collapse_button {
+          height: 44px;
+          width: 64px;
+          padding: 0px;
+          border-radius: 0px;
+          background-color: #5a2b81;
+          border: none;
+          align-self: center;
         }
-        el-menu-item:hover {
-          /*background-color: #DED4E6;*/
+        .el-menu {
+          border-right: none;
+          .item_menu_image {
+            margin-right: 10px;
+          }
         }
       }
       .el-main {
