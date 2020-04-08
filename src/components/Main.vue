@@ -17,20 +17,21 @@
         <el-aside :width="isCollapse ? '64px' : '200px'">
           <el-button class="collapse_button" type="primary" plan @click="collapseButtonClick">{{isCollapse ? "展开" : "收起"}}</el-button>
           <el-menu
-            default-active="1"
+            :default-active="activePath"
             background-color="#5a2b81"
             text-color="#fff"
             active-text-color="#ffd04b"
             unique-opened
             :collapse = "isCollapse"
-            :collapse-transition = "false">
+            :collapse-transition = "false"
+            router>
             <!-- 一级菜单 -->
             <el-submenu v-for="item in menusData" :key="item.id" :index="item.id + ''">
               <template slot="title">
                 <img :src="item.image" class="item_menu_image">
                 <span>{{item.authName}}</span>
               </template>
-              <el-menu-item v-for="child in item.children" :key="child.id" :index="child.id + ''">
+              <el-menu-item v-for="child in item.children" :key="child.id" :index="'/' + child.path" @click="menuItemClick(child)">
                 <template slot="title">
                   <i class="el-icon-menu"></i>
                   <span>{{child.authName}}</span>
@@ -40,7 +41,10 @@
           </el-menu>
         </el-aside>
         <!--显示区域-->
-        <el-main>Main</el-main>
+        <el-main>
+          <!--main page 的路由-->
+          <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
   </div>
@@ -55,11 +59,13 @@ export default {
   data () {
     return {
       menusData: [],
-      isCollapse: false
+      isCollapse: false,
+      activePath: ''
     }
   },
   created () {
     this.requestMenuData()
+    this.activePath = window.sessionStorage.getItem('active_path')
   },
   methods: {
     clickLogout () {
@@ -80,6 +86,11 @@ export default {
     },
     collapseButtonClick () {
       this.isCollapse = !this.isCollapse
+    },
+    menuItemClick (child) {
+      const activePath = '/' + child.path
+      window.sessionStorage.setItem('active_path', activePath)
+      this.activePath = activePath
     }
   }
 }
