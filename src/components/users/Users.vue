@@ -1,12 +1,51 @@
 <template>
   <div class="users">
-    用户列表
+    <el-breadcrumb separator-class="el-icon-arrow-right">
+      <el-breadcrumb-item :to="{ path: '/main' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-card>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-input placeholder="请输入内容">
+            <el-button slot="append" icon="el-icon-search"></el-button>
+          </el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="primary">添加用户</el-button>
+        </el-col>
+      </el-row>
+    </el-card>
   </div>
 </template>
 
 <script>
+import userRequest from '../../network/user_page'
 export default {
-  name: 'Users'
+  name: 'Users',
+  data () {
+    return {
+      param: {
+        query: '',
+        pagenum: 1,
+        pagesize: 2
+      },
+      userList: [],
+      total: []
+    }
+  },
+  created () {
+    this.loadUserList()
+  },
+  methods: {
+    loadUserList () {
+      userRequest.userList(this.param).then((res) => {
+        console.log(res)
+        if (res.meta.status !== 200) this.$message.error(res.meta.msg)
+      })
+    }
+  }
 }
 </script>
 
