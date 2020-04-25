@@ -26,6 +26,9 @@ axios.interceptors.response.use(
     if (res.data.meta.status === 200) {
       return Promise.resolve(res.data)
     }
+    if (res.data.meta.status === 201) {
+      return Promise.resolve(res.data)
+    }
     return Promise.reject(res.data.meta)
   },
   err => {

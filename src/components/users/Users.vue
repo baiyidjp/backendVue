@@ -9,12 +9,12 @@
       <!--搜索-->
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-input placeholder="请输入内容">
-            <el-button slot="append" icon="el-icon-search"></el-button>
+          <el-input placeholder="请输入内容" v-model="param.query" clearable @clear="loadUserList">
+            <el-button slot="append" icon="el-icon-search" @click="loadUserList"></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">添加用户</el-button>
+          <el-button type="primary" @click="dialogVisible = true">添加用户</el-button>
         </el-col>
       </el-row>
       <!--用护列表-->
@@ -55,6 +55,30 @@
         :total="total">
       </el-pagination>
     </el-card>
+    <el-dialog
+      title="添加用户"
+      :visible.sync="dialogVisible"
+      width="50%"
+      @close="dialogClosed">
+      <el-form :model="addUserForm" :rules="addUserRules" label-width="70px" ref="addUserRef">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addUserForm.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addUserForm.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addUserForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addUserForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogSureClicked">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -62,6 +86,22 @@
 export default {
   name: 'Users',
   data () {
+    const checkEmail = (rule, value, callback) => {
+      const regEmail = /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/
+      if (regEmail.test(value)) {
+        callback()
+      } else {
+        callback(new Error('请输入合法的邮箱'))
+      }
+    }
+    const checkMobile = (rule, value, callback) => {
+      const regMobile = /^[1][3,4,5,7,8][0-9]{9}$/
+      if (regMobile.test(value)) {
+        callback()
+      } else {
+        callback(new Error('请输入合法的手机号'))
+      }
+    }
     return {
       param: {
         query: '',
@@ -69,7 +109,32 @@ export default {
         pagesize: 5
       },
       userList: [],
-      total: 0
+      total: 0,
+      dialogVisible: false,
+      addUserForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      addUserRules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 10, message: '用户名的长度是3~10位字符' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 18, message: '密码的长度是6~18位字符' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          { validator: checkEmail, trigger: 'blur' }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { validator: checkMobile, trigger: 'blur' }
+        ]
+      }
     }
   },
   created () {
@@ -102,6 +167,23 @@ export default {
       }).catch((error) => {
         userInfo.mg_state = !userInfo.mg_state
         this.$message.error(error.msg)
+      })
+    },
+    // 添加用户关闭
+    dialogClosed () {
+      this.$refs.addUserRef.resetFields()
+    },
+    // 确定添加
+    dialogSureClicked () {
+      // 验证表格
+      this.$refs.addUserRef.validate((valid) => {
+        if (valid) {
+          this.$http.post('/users', this.addUserForm).then((res) => {
+            console.log(res)
+            this.dialogVisible = false
+            this.loadUserList()
+          })
+        }
       })
     }
   }
