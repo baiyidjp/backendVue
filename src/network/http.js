@@ -1,7 +1,6 @@
 'use strict'
 import axios from 'axios'
 import qs from 'qs'
-import store from '../store/index'
 
 // baseUrl
 axios.defaults.baseURL = 'http://106.12.11.162:8888/api/private/v1'
@@ -16,10 +15,6 @@ axios.interceptors.request.use(
     return config
   }
 )
-const getToken = function () {
-  // 使用store.getters.userToken会造成性能损耗
-  return store.state.loginInfo.token
-}
 // [ext] axios response interceptors
 axios.interceptors.response.use(
   res => {
@@ -70,8 +65,9 @@ http.get = function (url, params, needToken = true) {
     },
     responseType: 'json'
   }
-  if (needToken && store.state.loginInfo.token) {
-    config.headers.Authorization = getToken()
+  console.log(window.sessionStorage.getItem('token'))
+  if (needToken && window.sessionStorage.getItem('token')) {
+    config.headers.Authorization = window.sessionStorage.getItem('token')
   }
   return axios(config)
 }
@@ -86,8 +82,8 @@ http.post = function (url, obj, needToken = true) {
     },
     responseType: 'json'
   }
-  if (needToken && store.state.loginInfo.token) {
-    config.headers.Authorization = getToken()
+  if (needToken && window.sessionStorage.getItem('token')) {
+    config.headers.Authorization = window.sessionStorage.getItem('token')
   }
   return axios(config)
 }
@@ -103,8 +99,8 @@ http.put = function (url, obj, needToken = true) {
     },
     responseType: 'json'
   }
-  if (needToken && store.state.loginInfo.token) {
-    config.headers.Authorization = getToken()
+  if (needToken && window.sessionStorage.getItem('token')) {
+    config.headers.Authorization = window.sessionStorage.getItem('token')
   }
   return axios(config)
 }
@@ -120,8 +116,8 @@ http.delete = function (url, obj, needToken = true) {
     },
     responseType: 'json'
   }
-  if (needToken && store.state.loginInfo.token) {
-    config.headers.Authorization = getToken()
+  if (needToken && window.sessionStorage.getItem('token')) {
+    config.headers.Authorization = window.sessionStorage.getItem('token')
   }
   return axios(config)
 }

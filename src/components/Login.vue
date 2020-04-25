@@ -58,7 +58,7 @@ export default {
             this.loading = false
             this.$message.success('登录成功')
             // 保存在sessionStorage中
-            window.sessionStorage.setItem('token', JSON.stringify({ token: res.data.token }))
+            window.sessionStorage.setItem('token', res.data.token)
             // 跳转到首页
             this.$router.replace('/main')
           }).catch((error) => {
