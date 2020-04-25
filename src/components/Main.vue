@@ -51,9 +51,6 @@
 </template>
 
 <script>
-
-import mainRequest from '../network/main_page'
-
 export default {
   name: 'Main',
   data () {
@@ -73,15 +70,15 @@ export default {
       this.$router.replace('/login')
     },
     requestMenuData () {
-      mainRequest.menuData().then((res) => {
-        console.log(res)
-        if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.$http.get('/menus').then((res) => {
         const menusData = res.data
         for (let i = 0; i < menusData.length; i++) {
           const menuData = menusData[i]
           menuData.image = require(`../assets/img/menu/menu_${i}.png`)
         }
         this.menusData = menusData
+      }).catch((error) => {
+        this.$message.error(error.msg)
       })
     },
     collapseButtonClick () {

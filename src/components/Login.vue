@@ -8,8 +8,8 @@
       <div class="from_container">
         <el-form :model="form" :rules="rules" ref="formRef">
           <!-- 用户名 -->
-          <el-form-item prop="account">
-            <el-input v-model="form.account" clearable placeholder="请输入账号" prefix-icon="iconfont iconzhanghao"></el-input>
+          <el-form-item prop="username">
+            <el-input v-model="form.username" clearable placeholder="请输入账号" prefix-icon="iconfont iconzhanghao"></el-input>
           </el-form-item>
           <!-- 密码 -->
           <el-form-item prop="password">
@@ -27,19 +27,16 @@
 </template>
 
 <script>
-
-import loginRequest from '../network/login_page'
-
 export default {
   name: 'Login',
   data () {
     return {
       form: {
-        account: '',
+        username: '',
         password: ''
       },
       rules: {
-        account: [
+        username: [
           { required: true, message: '请输入账号', trigger: 'blur' },
           { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
         ],
@@ -57,17 +54,16 @@ export default {
       this.$refs.formRef.validate((valid) => {
         if (valid) {
           this.loading = true
-          loginRequest.login(this.form.account, this.form.password).then((res) => {
+          this.$http.post('/login', this.form, false).then((res) => {
             this.loading = false
-            if (res.meta.status === 200) {
-              this.$message.success('恭喜你,登录成功')
-              // 保存在sessionStorage中
-              window.sessionStorage.setItem('token', res.data.token)
-              // 跳转到首页
-              this.$router.replace('/main')
-            } else {
-              this.$message.error(res.meta.msg)
-            }
+            this.$message.success('登录成功')
+            // 保存在sessionStorage中
+            window.sessionStorage.setItem('token', JSON.stringify({ token: res.data.token }))
+            // 跳转到首页
+            this.$router.replace('/main')
+          }).catch((error) => {
+            this.loading = false
+            this.$message.error(error.msg)
           })
         } else {
           return false

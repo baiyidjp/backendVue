@@ -7,8 +7,11 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/global.css'
 // 引入fonticon
 import './assets/fonts/iconfont.css'
+// http
+import Http from './network/http'
 
 Vue.config.productionTip = false
+Vue.prototype.$http = Http
 
 Vue.use(ElementUI)
 

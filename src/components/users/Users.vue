@@ -30,7 +30,8 @@
             <el-switch
               v-model="scope.row.mg_state"
               active-color="#13ce66"
-              inactive-color="#ADADAD">
+              inactive-color="#ADADAD"
+              @change="userStatusChanged(scope.row)">
             </el-switch>
           </template>
         </el-table-column>
@@ -58,7 +59,6 @@
 </template>
 
 <script>
-import userRequest from '../../network/user_page'
 export default {
   name: 'Users',
   data () {
@@ -69,7 +69,7 @@ export default {
         pagesize: 5
       },
       userList: [],
-      total: []
+      total: 0
     }
   },
   created () {
@@ -77,11 +77,12 @@ export default {
   },
   methods: {
     loadUserList () {
-      userRequest.userList(this.param).then((res) => {
+      this.$http.get('/users', this.param).then((res) => {
         console.log(res)
-        if (res.meta.status !== 200) this.$message.error(res.meta.msg)
         this.userList = res.data.users
         this.total = res.data.total
+      }).catch((error) => {
+        this.$message.error(error.msg)
       })
     },
     // 监听pageSize改变的事件(改变当前一页显示多少条)
@@ -93,6 +94,15 @@ export default {
     handleCurrentChange (pageNum) {
       this.param.pagenum = pageNum
       this.loadUserList()
+    },
+    // 监听用户状态的改变
+    userStatusChanged (userInfo) {
+      this.$http.put(`/users/${userInfo.id}/state/${userInfo.mg_state}`).then((res) => {
+        this.$message.success('更改成功')
+      }).catch((error) => {
+        userInfo.mg_state = !userInfo.mg_state
+        this.$message.error(error.msg)
+      })
     }
   }
 }
