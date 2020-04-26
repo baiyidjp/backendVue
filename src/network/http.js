@@ -65,7 +65,6 @@ http.get = function (url, params, needToken = true) {
     },
     responseType: 'json'
   }
-  console.log(window.sessionStorage.getItem('token'))
   if (needToken && window.sessionStorage.getItem('token')) {
     config.headers.Authorization = window.sessionStorage.getItem('token')
   }
@@ -89,7 +88,6 @@ http.post = function (url, obj, needToken = true) {
 }
 
 http.put = function (url, obj, needToken = true) {
-  // obj['lang'] = localStorage.lang
   const config = {
     method: 'PUT',
     url: url,
@@ -106,7 +104,6 @@ http.put = function (url, obj, needToken = true) {
 }
 
 http.delete = function (url, obj, needToken = true) {
-  obj.lang = localStorage.lang
   const config = {
     method: 'DELETE',
     url: url,

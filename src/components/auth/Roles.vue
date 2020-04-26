@@ -1,0 +1,88 @@
+<template>
+    <div>
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item :to="{ path: '/main' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item>权限管理</el-breadcrumb-item>
+        <el-breadcrumb-item>角色列表</el-breadcrumb-item>
+      </el-breadcrumb>
+      <el-card>
+        <el-row>
+          <el-col>
+            <el-button type="primary" @click="addDialogVisible = true">添加角色</el-button>
+          </el-col>
+        </el-row>
+        <el-table :data="rolesList" border stripe>
+          <el-table-column type="expand">
+            <template slot-scope="scope">
+              <el-row class="borderBottom vCenter" v-for="(item1, index1) in scope.row.children" :key="item1.id" :class="{ borderTop: index1 === 0 }">
+                <el-col :span="5">
+                  <el-tag closable>{{ item1.authName }}</el-tag>
+                  <i class="el-icon-caret-right"></i>
+                </el-col>
+                <el-col :span="19">
+                  <el-row v-for="(item2, index2) in item1.children" :key="item2.id" class="vCenter" :class="{ borderTop: index2 !== 0}">
+                    <el-col :span="6">
+                      <el-tag closable type="success">{{ item2.authName }}</el-tag>
+                      <i class="el-icon-caret-right"></i>
+                    </el-col>
+                    <el-col :span="18">
+                      <el-tag closable type="warning" v-for="item3 in item2.children" :key="item3.id">{{ item3.authName }}</el-tag>
+                    </el-col>
+                  </el-row>
+                </el-col>
+              </el-row>
+            </template>
+          </el-table-column>
+          <el-table-column label="#" type="index"></el-table-column>
+          <el-table-column label="角色名称" prop="roleName"></el-table-column>
+          <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
+          <el-table-column label="操作" width="300px">
+            <template>
+              <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
+              <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
+              <el-button size="mini" type="warning" icon="el-icon-setting">权限分配</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
+    </div>
+</template>
+
+<script>
+export default {
+  name: 'Roles',
+  data () {
+    return {
+      rolesList: []
+    }
+  },
+  created () {
+    this.loadRoles()
+  },
+  methods: {
+    loadRoles () {
+      this.$http.get('/roles').then(res => {
+        this.rolesList = res.data
+      }).catch(error => {
+        this.$message.error(error.msg)
+      })
+    }
+  }
+}
+</script>
+
+<style lang="less" scoped>
+  .el-tag {
+    margin: 5px;
+  }
+  .borderTop {
+    border-top: .5px solid rgba(0,0,0,.1);
+  }
+  .borderBottom {
+    border-bottom: .5px solid rgba(0,0,0,.1);
+  }
+  .vCenter {
+    display: flex;
+    align-items: center;
+  }
+</style>

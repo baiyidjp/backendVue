@@ -14,7 +14,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary" @click="dialogVisible = true">添加用户</el-button>
+          <el-button type="primary" @click="addDialogVisible = true">添加用户</el-button>
         </el-col>
       </el-row>
       <!--用护列表-->
@@ -36,11 +36,11 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180px">
-          <template>
-            <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
-            <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+          <template slot-scope="scope">
+            <el-button type="primary" icon="el-icon-edit" size="mini" @click="editUserClicked(scope.row.id)"></el-button>
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteUserClicked(scope.row.id)"></el-button>
             <el-tooltip effect="dark" content="用户设置" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="mini" @click="userSettingClicked(scope.row.id)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -57,7 +57,7 @@
     </el-card>
     <el-dialog
       title="添加用户"
-      :visible.sync="dialogVisible"
+      :visible.sync="addDialogVisible"
       width="50%"
       @close="dialogClosed">
       <el-form :model="addUserForm" :rules="addUserRules" label-width="70px" ref="addUserRef">
@@ -75,9 +75,30 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="dialogSureClicked">确 定</el-button>
-  </span>
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogSureClicked">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog
+      title="编辑用户"
+      :visible.sync="editDialogVisible"
+      width="50%"
+      @close="editDialogClosed">
+      <el-form :model="editUserForm" :rules="addUserRules" label-width="70px" ref="editUserRef">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="editUserForm.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="editUserForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="editUserForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editDialogSureClicked">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -110,7 +131,7 @@ export default {
       },
       userList: [],
       total: 0,
-      dialogVisible: false,
+      addDialogVisible: false,
       addUserForm: {
         username: '',
         password: '',
@@ -134,6 +155,13 @@ export default {
           { required: true, message: '请输入手机号', trigger: 'blur' },
           { validator: checkMobile, trigger: 'blur' }
         ]
+      },
+      editDialogVisible: false,
+      editUserForm: {
+        id: '',
+        username: '',
+        email: '',
+        mobile: ''
       }
     }
   },
@@ -177,15 +205,60 @@ export default {
     dialogSureClicked () {
       // 验证表格
       this.$refs.addUserRef.validate((valid) => {
-        if (valid) {
-          this.$http.post('/users', this.addUserForm).then((res) => {
-            console.log(res)
-            this.dialogVisible = false
-            this.loadUserList()
-          })
-        }
+        if (!valid) return
+        this.$http.post('/users', this.addUserForm).then((res) => {
+          console.log(res)
+          this.addDialogVisible = false
+          this.loadUserList()
+        })
       })
-    }
+    },
+    // 编辑用户按钮的点击
+    editUserClicked (id) {
+      const url = `/users/${id}`
+      this.$http.get(url).then(res => {
+        this.editUserForm = res.data
+        this.editDialogVisible = true
+      })
+    },
+    // 关闭编辑弹窗
+    editDialogClosed () {
+      this.$refs.editUserRef.resetFields()
+    },
+    // 确定编辑
+    editDialogSureClicked () {
+      this.$refs.editUserRef.validate(valid => {
+        if (!valid) return
+        const url = `/users/${this.editUserForm.id}`
+        this.$http.put(url, { email: this.editUserForm.email, mobile: this.editUserForm.mobile }).then((res) => {
+          this.editDialogVisible = false
+          this.loadUserList()
+          this.$message.success('用户信息修改成功')
+        }).catch(error => {
+          this.$message.error(error.msg)
+        })
+      })
+    },
+    // 删除用户的点击
+    deleteUserClicked (id) {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const url = `/users/${id}`
+        this.$http.delete(url).then(res => {
+          this.loadUserList()
+          this.$message.success('用户删除成功')
+        }).catch(error => {
+          this.$message.error(error.msg)
+        })
+      }).catch(() => {
+        this.$message.info('取消删除')
+      })
+    },
+    // 设置
+    userSettingClicked (id) {}
   }
 }
 </script>
