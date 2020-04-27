@@ -16,17 +16,17 @@
             <template slot-scope="scope">
               <el-row class="borderBottom vCenter" v-for="(item1, index1) in scope.row.children" :key="item1.id" :class="{ borderTop: index1 === 0 }">
                 <el-col :span="5">
-                  <el-tag closable>{{ item1.authName }}</el-tag>
+                  <el-tag closable @close="cancelAuth(scope.row, item1.id)">{{ item1.authName }}</el-tag>
                   <i class="el-icon-caret-right"></i>
                 </el-col>
                 <el-col :span="19">
                   <el-row v-for="(item2, index2) in item1.children" :key="item2.id" class="vCenter" :class="{ borderTop: index2 !== 0}">
                     <el-col :span="6">
-                      <el-tag closable type="success">{{ item2.authName }}</el-tag>
+                      <el-tag closable type="success" @close="cancelAuth(scope.row, item2.id)">{{ item2.authName }}</el-tag>
                       <i class="el-icon-caret-right"></i>
                     </el-col>
                     <el-col :span="18">
-                      <el-tag closable type="warning" v-for="item3 in item2.children" :key="item3.id">{{ item3.authName }}</el-tag>
+                      <el-tag closable type="warning" v-for="item3 in item2.children" :key="item3.id" @close="cancelAuth(scope.row, item3.id)">{{ item3.authName }}</el-tag>
                     </el-col>
                   </el-row>
                 </el-col>
@@ -65,6 +65,27 @@ export default {
         this.rolesList = res.data
       }).catch(error => {
         this.$message.error(error.msg)
+      })
+    },
+    // 取消权限
+    cancelAuth (role, id) {
+      this.$confirm('你确定要取消当前权限吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const url = `/roles/${role.id}/rights/${id}`
+        this.$http.delete(url).then(res => {
+          this.$message.success('取消成功')
+          role.children = res.data
+        }).catch(error => {
+          this.$message.error(error.msg)
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '操作已取消'
+        })
       })
     }
   }
