@@ -37,14 +37,31 @@
           <el-table-column label="角色名称" prop="roleName"></el-table-column>
           <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
           <el-table-column label="操作" width="300px">
-            <template>
+            <template slot-scope="scope">
               <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
               <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
-              <el-button size="mini" type="warning" icon="el-icon-setting">权限分配</el-button>
+              <el-button size="mini" type="warning" icon="el-icon-setting" @click="showAuthList(scope.row)">权限分配</el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-card>
+      <el-dialog
+        title="权限分配"
+        :visible.sync="authDialogVisible"
+        width="50%">
+        <el-tree
+          :data="authListData"
+          :props="defaultProps"
+          show-checkbox
+          default-expand-all
+          :default-checked-keys="defaultKeys"
+          node-key="id">
+        </el-tree>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="authDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="authDialogVisible = false">确 定</el-button>
+        </span>
+      </el-dialog>
     </div>
 </template>
 
@@ -53,7 +70,14 @@ export default {
   name: 'Roles',
   data () {
     return {
-      rolesList: []
+      rolesList: [],
+      authDialogVisible: false,
+      authListData: [],
+      defaultKeys: [],
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
+      }
     }
   },
   created () {
@@ -86,6 +110,26 @@ export default {
           type: 'info',
           message: '操作已取消'
         })
+      })
+    },
+    // 展示所有权限 分配权限
+    showAuthList (role) {
+      this.$http.get('/rights/tree').then(res => {
+        this.authListData = res.data
+        this.getDefaultKeys(role, this.defaultKeys)
+        console.log(this.defaultKeys)
+        this.authDialogVisible = true
+      }).catch(error => {
+        this.$message.error(error.msg)
+      })
+    },
+    // 取出三级权限列表
+    getDefaultKeys (role, list) {
+      if (!role.children) {
+        return list.push(role.id)
+      }
+      role.children.forEach(item => {
+        this.getDefaultKeys(item, list)
       })
     }
   }
