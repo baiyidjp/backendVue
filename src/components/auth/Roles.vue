@@ -45,18 +45,8 @@
           </el-table-column>
         </el-table>
       </el-card>
-      <el-dialog
-        title="权限分配"
-        :visible.sync="authDialogVisible"
-        width="50%">
-        <el-tree
-          :data="authListData"
-          :props="defaultProps"
-          show-checkbox
-          default-expand-all
-          :default-checked-keys="defaultKeys"
-          node-key="id">
-        </el-tree>
+      <el-dialog title="权限分配" :visible.sync="authDialogVisible" width="50%" @close="authDialogClosed">
+        <el-tree v-if="authDialogVisible" :data="authListData" :props="defaultProps" show-checkbox default-expand-all node-key="id" :default-checked-keys="defaultCheckedKeys"></el-tree>
         <span slot="footer" class="dialog-footer">
           <el-button @click="authDialogVisible = false">取 消</el-button>
           <el-button type="primary" @click="authDialogVisible = false">确 定</el-button>
@@ -72,8 +62,8 @@ export default {
     return {
       rolesList: [],
       authDialogVisible: false,
-      authListData: [],
-      defaultKeys: [],
+      authListData: null,
+      defaultCheckedKeys: [],
       defaultProps: {
         children: 'children',
         label: 'authName'
@@ -114,23 +104,31 @@ export default {
     },
     // 展示所有权限 分配权限
     showAuthList (role) {
-      this.$http.get('/rights/tree').then(res => {
-        this.authListData = res.data
-        this.getDefaultKeys(role, this.defaultKeys)
-        console.log(this.defaultKeys)
+      if (this.authListData) {
+        this.getDefaultKeys(role, this.defaultCheckedKeys)
         this.authDialogVisible = true
-      }).catch(error => {
-        this.$message.error(error.msg)
-      })
+        console.log(this.defaultCheckedKeys)
+      } else {
+        this.$http.get('/rights/tree').then(res => {
+          this.authListData = res.data
+          this.getDefaultKeys(role, this.defaultCheckedKeys)
+          console.log(this.defaultCheckedKeys)
+          this.authDialogVisible = true
+        }).catch(error => {
+          this.$message.error(error.msg)
+        })
+      }
     },
     // 取出三级权限列表
-    getDefaultKeys (role, list) {
-      if (!role.children) {
-        return list.push(role.id)
+    getDefaultKeys (node, arr) {
+      if (!node.children) {
+        return arr.push(node.id)
       }
-      role.children.forEach(item => {
-        this.getDefaultKeys(item, list)
-      })
+      node.children.forEach(item => this.getDefaultKeys(item, arr))
+    },
+    // 关闭弹窗时清除已保存的权限Id
+    authDialogClosed () {
+      this.defaultCheckedKeys = []
     }
   }
 }
