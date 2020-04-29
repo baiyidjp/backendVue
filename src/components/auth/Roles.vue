@@ -46,10 +46,10 @@
         </el-table>
       </el-card>
       <el-dialog title="权限分配" :visible.sync="authDialogVisible" width="50%" @close="authDialogClosed">
-        <el-tree v-if="authDialogVisible" :data="authListData" :props="defaultProps" show-checkbox default-expand-all node-key="id" :default-checked-keys="defaultCheckedKeys"></el-tree>
+        <el-tree ref="treeRef" v-if="authDialogVisible" :data="authListData" :props="defaultProps" show-checkbox default-expand-all node-key="id" :default-checked-keys="defaultCheckedKeys"></el-tree>
         <span slot="footer" class="dialog-footer">
           <el-button @click="authDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="authDialogVisible = false">确 定</el-button>
+          <el-button type="primary" @click="authDialogSure">确 定</el-button>
         </span>
       </el-dialog>
     </div>
@@ -67,7 +67,8 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'authName'
-      }
+      },
+      currentRoleId: null
     }
   },
   created () {
@@ -104,15 +105,14 @@ export default {
     },
     // 展示所有权限 分配权限
     showAuthList (role) {
+      this.currentRoleId = role.id
       if (this.authListData) {
         this.getDefaultKeys(role, this.defaultCheckedKeys)
         this.authDialogVisible = true
-        console.log(this.defaultCheckedKeys)
       } else {
         this.$http.get('/rights/tree').then(res => {
           this.authListData = res.data
           this.getDefaultKeys(role, this.defaultCheckedKeys)
-          console.log(this.defaultCheckedKeys)
           this.authDialogVisible = true
         }).catch(error => {
           this.$message.error(error.msg)
@@ -129,6 +129,17 @@ export default {
     // 关闭弹窗时清除已保存的权限Id
     authDialogClosed () {
       this.defaultCheckedKeys = []
+    },
+    authDialogSure () {
+      const allIds = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
+      const ids = allIds.join(',')
+      this.$http.post(`/roles/${this.currentRoleId}/rights`, { rids: ids }).then(res => {
+        this.$message.success('分配成功')
+        this.loadRoles()
+        this.authDialogVisible = false
+      }).catch(error => {
+        this.$message.error(error.msg)
+      })
     }
   }
 }
